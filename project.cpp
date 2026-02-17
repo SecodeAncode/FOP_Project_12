@@ -8,6 +8,12 @@ using namespace std;
 
 bool  ispenExtensionAdded=false;
 
+bool showErrorMessage=false;
+
+Uint32 errorTime=0;
+
+const int ERROR_DURATION=2000;
+
 SDL_Rect penIcon{20 , 530 , 60 , 60};
 
 struct pen {
@@ -29,11 +35,11 @@ pen myPen ;
 
 
 SDL_Texture* spriteTexture = nullptr;
-SDL_Rect spriteRect ={100 , 100 ,50 , 50};
+SDL_Rect spriteRect ={375 , 275 ,50 , 50};
 
 void eraseAll (SDL_Renderer* renderer , SDL_Texture* canvas) ;
 
-void drawLine (SDL_Renderer* renderer , int x1 , int y1 , int x2 , int y2) ;
+void drawLine (SDL_Renderer* renderer  ,  SDL_Texture* canvas , int x1 , int y1 , int x2 , int y2) ;
 
 
 void stamp (SDL_Renderer* renderer , SDL_Texture* texture , SDL_Rect* pos, SDL_Texture* texture2) ;
@@ -42,6 +48,13 @@ void stamp (SDL_Renderer* renderer , SDL_Texture* texture , SDL_Rect* pos, SDL_T
 void updateColor ( );
 
 void checkExtension (int mousex , int mousey) ;
+
+
+
+void renderErrorMessage(SDL_Renderer* renderer);
+
+
+void triggerExtensionError();
 
 int main(int argc , char *argv[]) {
 
@@ -75,7 +88,6 @@ int main(int argc , char *argv[]) {
     while(!quit) {
 
         while(SDL_PollEvent(&event)) {
-
             if(event.type == SDL_QUIT)
                 quit = true;
 
@@ -86,45 +98,69 @@ int main(int argc , char *argv[]) {
                 }
             }
 
-            if (event.type==SDL_KEYDOWN && ispenExtensionAdded ) {
-
+            if (event.type==SDL_KEYDOWN ) {
                 int oldx=spriteRect.x + spriteRect.w/2;
                 int oldy=spriteRect.y + spriteRect.h/2;
 
+                bool isMovement=false;
+
+                if(event.key.keysym.sym == SDLK_UP) {
+                    spriteRect.y -= 10;
+                    isMovement=true;
+                }
+                else if (event.key.keysym.sym ==SDLK_DOWN) {
+                    spriteRect.y += 10;
+                    isMovement=true;
+                }
+                else if ( event.key.keysym.sym ==SDLK_LEFT) {
+                    spriteRect.x -= 10;
+                    isMovement=true;
+                }
+                else if (event.key.keysym.sym == SDLK_RIGHT) {
+                    spriteRect.x += 10;
+                    isMovement=true;
+                }
                 switch (event.key.keysym.sym) {
-                    case SDLK_UP:
-                        spriteRect.y -= 10; break;
-                        case SDLK_DOWN:
-                        spriteRect.y += 10; break;
-                        case SDLK_LEFT:
-                        spriteRect.x -= 10; break;
-                        case SDLK_RIGHT:
-                        spriteRect.x += 10; break;
-                    case SDLK_d:
-                        myPen.isDown = ! myPen.isDown; break;
-                    case SDLK_s:
-                        stamp( r , canvas , &spriteRect , spriteTexture ); break;
-                    case SDLK_e:
-                        eraseAll(r , canvas); break;
+                    case SDLK_d:  case SDLK_s:  case SDLK_e:   case SDLK_EQUALS:  case SDLK_MINUS:   case SDLK_b:
 
-                    case SDLK_EQUALS:
-                        myPen.size++; break;
-                    case SDLK_MINUS: if (myPen.size > 1)
-                        myPen.size--; break;
 
-                    case SDLK_b:
-                        myPen.brightness = (myPen.brightness <=10) ? 100 : myPen.brightness -10;
-                        updateColor(); break;
 
+
+                        if ( ispenExtensionAdded){
+                            if (event.key.keysym.sym== SDLK_d)
+                                myPen.isDown = ! myPen.isDown;
+                            if (event.key.keysym.sym== SDLK_s)
+                                stamp( r , canvas , &spriteRect , spriteTexture );
+
+                            if (event.key.keysym.sym== SDLK_e)
+                                eraseAll(r , canvas);
+
+                            if (event.key.keysym.sym== SDLK_EQUALS)
+                                myPen.size++;
+                            if (event.key.keysym.sym== SDLK_MINUS&& (myPen.size > 1) )
+                                myPen.size--;
+
+                            if (event.key.keysym.sym== SDLK_b) {
+                                myPen.brightness = (myPen.brightness <=10) ? 100 : myPen.brightness -10;
+                                updateColor();
+                            }
+
+                        }
+                        else {
+                            triggerExtensionError();
+                        }
+
+                        break;
                 }
 
-                int newx=spriteRect.x + spriteRect.w/2;
-                int newy=spriteRect.y + spriteRect.h/2;
-                drawLine(r , oldx , oldy, newx, newy);
+                if (isMovement && ispenExtensionAdded ){
+
+                    int newx=spriteRect.x + spriteRect.w/2;
+                    int newy=spriteRect.y + spriteRect.h/2;
+                    drawLine(r , canvas , oldx , oldy, newx, newy);
+                }
             }
-
         }
-
 
 
         SDL_SetRenderDrawColor(r,200,200,200,255);
@@ -132,7 +168,16 @@ int main(int argc , char *argv[]) {
         SDL_RenderClear(r);
         SDL_RenderCopy(r, canvas, NULL , NULL );
 
+        if (! ispenExtensionAdded) {
+
+            SDL_SetRenderDrawColor(r,0,100,255,200);
+            SDL_RenderFillRect(r , &penIcon);
+
+        }
         SDL_RenderCopy(r, spriteTexture , NULL , &spriteRect );
+
+
+        renderErrorMessage(r);
         SDL_RenderPresent(r);
     }
 
@@ -200,13 +245,40 @@ void updateColor ( ) {
 void checkExtension (int mousex , int mousey) {
     SDL_Point mousepos ={mousex,mousey};
 
-    if (SDL_PointInRect(&mousepos, &spriteRect)) {
+    if (SDL_PointInRect(&mousepos, &penIcon)) {
         if (!ispenExtensionAdded) {
             ispenExtensionAdded = true;
 
-            cout << "Pen Extension Activated"<<endl;
+            //cout << "Pen Extension Activated"<<endl;
 
             updateColor();
         }
+    }
+}
+
+
+void renderErrorMessage(SDL_Renderer* renderer) {
+
+    if (showErrorMessage) {
+        if (SDL_GetTicks()- errorTime > ERROR_DURATION ) {
+            showErrorMessage = false;
+        }
+        else {
+
+            SDL_Rect errorRect = {200 , 540 , 400 , 50};
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 150);
+            SDL_RenderFillRect(renderer, &errorRect);
+        }
+    }
+}
+
+void triggerExtensionError() {
+    if (!ispenExtensionAdded) {
+        showErrorMessage = true;
+        errorTime = SDL_GetTicks();
+
+        cout<<"Error: You must add the pen Etension first!"<<endl;
     }
 }
