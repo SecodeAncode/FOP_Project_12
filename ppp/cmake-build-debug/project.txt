@@ -1,0 +1,26 @@
+$SPRITE
+name = Cat
+xPosition = 100
+yPosirion = 150
+size = 100
+direction = 90
+index = 0
+visible= true
+customPath : cat.png
+$Blocks
+move 10
+say Hello
+$ENDSPRITE
+$SPRITE
+name = Dog
+xPosition = 200
+yPosirion = 250
+size = 80
+direction = 45
+index = 1
+visible= false
+customPath : dog.png
+$Blocks
+turn 20
+wait 2
+$ENDSPRITE

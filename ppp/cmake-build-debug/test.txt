@@ -1,0 +1,14 @@
+$SPRITE
+name = Cat
+xPosition = 100
+yPosirion = 150
+size = 100
+direction = 90
+index = 0
+visible= true
+customPath : cat.png
+$Blocks
+move 10
+say Hello
+turn 15
+$ENDSPRITE

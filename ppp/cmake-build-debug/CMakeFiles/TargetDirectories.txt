@@ -1,0 +1,3 @@
+C:/Users/Amir Mohammad/CLionProjects/ppp/cmake-build-debug/CMakeFiles/ppp.dir
+C:/Users/Amir Mohammad/CLionProjects/ppp/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Amir Mohammad/CLionProjects/ppp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
