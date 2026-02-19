@@ -204,7 +204,7 @@ void eraseAll (SDL_Renderer* renderer , SDL_Texture* canvas) {
     SDL_RenderClear(renderer);
   //SDL_RenderPresent(renderer);
     SDL_SetRenderTarget(renderer, NULL);
-    SDL_RenderPresent(renderer);
+   // SDL_RenderPresent(renderer);
 }
 
 void drawLine (SDL_Renderer* renderer , SDL_Texture* canvas , int x1 , int y1 , int x2 , int y2) {
@@ -215,7 +215,7 @@ void drawLine (SDL_Renderer* renderer , SDL_Texture* canvas , int x1 , int y1 , 
         thickLineColor(renderer , x1 , y1 , x2 , y2 , myPen.size , myPen.currentColor);
 
         SDL_SetRenderTarget(renderer, NULL);
-        SDL_RenderPresent(renderer);
+       // SDL_RenderPresent(renderer);
     }
 }
 
