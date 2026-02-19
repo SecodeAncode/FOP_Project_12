@@ -97,19 +97,12 @@ sprite cat ;
     }
 
 
-
-
-
-
-
-    SDL_RenderPresent(r);
+   // SDL_RenderPresent(r);
 
 
     SDL_DestroyRenderer(r);
     SDL_DestroyWindow(window);
     SDL_Quit();
-
-
 
     return 0;
 }
