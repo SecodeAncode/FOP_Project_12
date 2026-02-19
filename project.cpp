@@ -279,6 +279,6 @@ void triggerExtensionError() {
         showErrorMessage = true;
         errorTime = SDL_GetTicks();
 
-        cout<<"Error: You must add the pen Etension first!"<<endl;
+
     }
 }
