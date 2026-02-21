@@ -36,16 +36,19 @@ struct Sprite {
     bool visible;
     bool draggable;
     int currentCostume;
-    std::vector<SDL_Texture*> costumes;
+    vector<SDL_Texture*> costumes;
+    float volume;                 
+    float pitch;                 
+    float pan; 
 
-    std::string bubbleText;
+    string bubbleText;
     Uint32 bubbleExpireTime;
     bool bubbleIsThink;
     float effects[NUM_EFFECTS];
 
     //INITIALIZE
     Sprite() : x(0), y(0), direction(90), size(100), visible(true), draggable(false),
-               currentCostume(0), bubbleText(""), bubbleExpireTime(0), bubbleIsThink(false) {
+               currentCostume(0), bubbleText(""), bubbleExpireTime(0), bubbleIsThink(false), volume(100), pitch(0), pan(0) {
         for (int i = 0; i < NUM_EFFECTS; ++i) effects[i] = 0.0f;
     }
 };
